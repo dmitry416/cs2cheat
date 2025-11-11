@@ -10,6 +10,8 @@
 #include "windows.h"
 #include <tlhelp32.h>
 #include <psapi.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "offsets.h"
 

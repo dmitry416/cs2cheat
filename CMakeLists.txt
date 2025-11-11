@@ -4,6 +4,16 @@ project(cs2cheat)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
 
+include(FetchContent)
+
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY	https://github.com/g-truc/glm.git
+        GIT_TAG 	0af55ccecd98d4e5a8d1fad7de25ba429d60e863 #refs/tags/1.0.1
+)
+
+FetchContent_MakeAvailable(glm)
+
 add_executable(cs2cheat
         main.cpp
         headers/offsets.h
@@ -15,6 +25,8 @@ add_executable(cs2cheat
         utils/utils.h
         utils/utils.cpp
 )
+
+target_link_libraries(cs2cheat PRIVATE glm::glm)
 
 if(WIN32)
     target_link_libraries(cs2cheat PRIVATE

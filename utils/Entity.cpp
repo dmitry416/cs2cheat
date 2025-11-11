@@ -35,3 +35,8 @@ bool Entity::isInit() {
 
     return true;
 }
+
+glm::vec3 Entity::getLocalEyePos() {
+    return RPM<glm::vec3>(address + m_vOldOrigin) +
+           RPM<vec3>(address + m_vecViewOffset);
+}

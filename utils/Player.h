@@ -23,6 +23,8 @@ public:
     void setJump(int value);
 
     bool isInit();
+
+    glm::vec3 getLocalEyePos();
 };
 
 

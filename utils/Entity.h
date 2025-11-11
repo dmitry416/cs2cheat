@@ -21,6 +21,8 @@ public:
     void setSpotted(bool value);
 
     bool isInit();
+
+    glm::vec3 getLocalEyePos();
 };
 
 
