@@ -71,3 +71,13 @@ glm::vec3 Player::getLocalEyePos() {
     return RPM<glm::vec3>(address + m_vOldOrigin) +
            RPM<vec3>(address + m_vecViewOffset);
 }
+
+int Player::getCrosshairID() {
+    updateAddress();
+    if (!address) return 0;
+    return RPM<int>(address + m_iIDEntIndex);
+}
+
+void Player::setAttack(int value) {
+    WPM<int>(BaseAddress + dwForceAttack, value);
+}

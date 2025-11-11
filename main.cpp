@@ -10,6 +10,7 @@ bool bunnyhop = false;
 bool antiflash = false;
 bool aimbot = false;
 bool glow = false;
+bool trigger = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
@@ -32,19 +33,25 @@ void checkKeys() {
 
     if (GetAsyncKeyState(VK_F7) & 1) {
         antiflash = !antiflash;
-        cout << "[Toggle] antiflash = " << (antiflash ? "ON" : "OFF") << endl;
+        cout << "[Toggle] Anti-Flash = " << (antiflash ? "ON" : "OFF") << endl;
     }
 
     if (GetAsyncKeyState(VK_F8) & 1) {
         aimbot = !aimbot;
-        cout << "[Toggle] aimbot = " << (aimbot ? "ON" : "OFF") << endl;
+        cout << "[Toggle] Aimbot = " << (aimbot ? "ON" : "OFF") << endl;
     }
 
     if (GetAsyncKeyState(VK_F9) & 1) {
         glow = !glow;
-        cout << "[Toggle] glow = " << (glow ? "ON" : "OFF") << endl;
+        cout << "[Toggle] Glow = " << (glow ? "ON" : "OFF") << endl;
+    }
+
+    if (GetAsyncKeyState(VK_F4) & 1) {
+        trigger = !trigger;
+        cout << "[Toggle] Trigger bot = " << (trigger ? "ON" : "OFF") << endl;
     }
 }
+
 
 int main() {
     if (!init()) {
@@ -58,11 +65,11 @@ int main() {
     entities.reserve(64);
 
     bool wasGlowEnabled = false;
-    const Color enemyGlowColor = {255, 0, 0, 255}; 
+    const Color enemyGlowColor = {255, 0, 0, 255};
     const Color teamGlowColor  = {0, 150, 255, 255};
 
     for (;;) {
-        if (!player.isInit()) continue;
+        if (!player.isInit() || player.getDormant()) continue;
         checkKeys();
 
         if (!player.isInit()) {
@@ -154,6 +161,24 @@ int main() {
             if (smallestFOV < maxAimAngle) {
                 vec3 targetAngle = CalculateViewAngles(playerEyePos, bestEnemyPos);
                 WPM<vec3>(BaseAddress + dwViewAngles, targetAngle);
+            }
+        }
+
+        if (trigger) {
+            int crosshairId = player.getCrosshairID();
+            if (crosshairId >= 0) {
+                uintptr_t entityList = RPM<uintptr_t>(BaseAddress + dwEntityList);
+                uintptr_t listEntry = RPM<uintptr_t >(entityList + 0x8 * (crosshairId >> 9) + 0x10);
+                uintptr_t pawn = RPM<uintptr_t>(listEntry + 0x70 * (crosshairId & 0x1FF));
+                if (pawn) {
+                    Entity entity(pawn);
+                    if (entity.getTeamNum() != player.getTeamNum() && entity.getHealth() > 0) {
+                        this_thread::sleep_for(chrono::milliseconds(5));
+                        player.setAttack(65537);
+                        this_thread::sleep_for(chrono::milliseconds(5));
+                        player.setAttack(256);
+                    }
+                }
             }
         }
 
