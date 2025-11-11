@@ -45,19 +45,17 @@ int Player::getFFlag() {
 }
 
 float Player::getFlashDuration() {
-    uintptr_t localPlayerPawn = RPM<uintptr_t>(BaseAddress + offsets::dwLocalPlayerPawn);
+    updateAddress();
+    if (!address) return 0;
 
-    if (localPlayerPawn == 0) return 0.0f;
-
-    return RPM<float>(localPlayerPawn + offsets::m_flFlashDuration);
+    return RPM<float>(address + m_flFlashDuration);
 }
 
-void Player::setFlashDuration() {
-    uintptr_t localPlayerPawn = RPM<uintptr_t>(BaseAddress + offsets::dwLocalPlayerPawn);
+void Player::setFlashDuration(float value) {
+    updateAddress();
+    if (!address) return;
 
-    if (localPlayerPawn == 0) return;
-
-    WPM<float>(localPlayerPawn + offsets::m_flFlashDuration, 0.0f);
+    WPM<float>(address + m_flFlashDuration, value);
 }
 
 void Player::setJump(int value) {
