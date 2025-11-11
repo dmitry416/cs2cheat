@@ -78,6 +78,7 @@ bool init() {
 
     cout << "\n==========================" << endl;
     cout << "RadarHack [F5]" << endl;
+    cout << "Bunnyhop  [F6]" << endl;
     cout << "==========================" << endl;
 
     return true;
