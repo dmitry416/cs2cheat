@@ -56,6 +56,7 @@ template void WPM<int>(uintptr_t, int);
 template void WPM<float>(uintptr_t, float);
 
 template void WPM<bool>(uintptr_t, bool);
+template void WPM<Color>(uintptr_t, Color);
 
 template vec3 RPM<vec3>(uintptr_t);
 
@@ -89,10 +90,11 @@ bool init() {
     }
 
     cout << "\n==========================" << endl;
-    cout << "RadarHack [F5]" << endl;
-    cout << "Bunnyhop  [F6]" << endl;
+    cout << "RadarHack   [F5]" << endl;
+    cout << "Bunnyhop    [F6]" << endl;
     cout << "Anti-flash  [F7]" << endl;
-    cout << "Aimbot  [F8]" << endl;
+    cout << "Aimbot      [F8]" << endl;
+    cout << "Glow        [F9]" << endl;
     cout << "==========================" << endl;
 
     return true;

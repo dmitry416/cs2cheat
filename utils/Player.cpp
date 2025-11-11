@@ -23,6 +23,11 @@ bool Player::getDormant() {
     return RPM<bool>(address + m_bDormant);
 }
 
+uintptr_t Player::getAddress() {
+    updateAddress();
+    return address;
+}
+
 bool Player::isInit() {
     updateAddress();
     if (!address) return false;

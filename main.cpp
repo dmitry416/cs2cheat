@@ -9,6 +9,7 @@ bool radarhack = false;
 bool bunnyhop = false;
 bool antiflash = false;
 bool aimbot = false;
+bool glow = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
@@ -21,12 +22,12 @@ const float maxDistance = 1000;
 void checkKeys() {
     if (GetAsyncKeyState(VK_F5) & 1) {
         radarhack = !radarhack;
-        cout << "[Toggle] radarhack = " << (radarhack ? "ON" : "OFF") << endl;
+        cout << "[Toggle] RadarHack = " << (radarhack ? "ON" : "OFF") << endl;
     }
 
     if (GetAsyncKeyState(VK_F6) & 1) {
         bunnyhop = !bunnyhop;
-        cout << "[Toggle] bunnyhop = " << (bunnyhop ? "ON" : "OFF") << endl;
+        cout << "[Toggle] Bunnyhop = " << (bunnyhop ? "ON" : "OFF") << endl;
     }
 
     if (GetAsyncKeyState(VK_F7) & 1) {
@@ -38,8 +39,12 @@ void checkKeys() {
         aimbot = !aimbot;
         cout << "[Toggle] aimbot = " << (aimbot ? "ON" : "OFF") << endl;
     }
-}
 
+    if (GetAsyncKeyState(VK_F9) & 1) {
+        glow = !glow;
+        cout << "[Toggle] glow = " << (glow ? "ON" : "OFF") << endl;
+    }
+}
 
 int main() {
     if (!init()) {
@@ -52,9 +57,20 @@ int main() {
     vector<Entity> entities;
     entities.reserve(64);
 
+    bool wasGlowEnabled = false;
+    const Color enemyGlowColor = {255, 0, 0, 255}; 
+    const Color teamGlowColor  = {0, 150, 255, 255};
+
     for (;;) {
         if (!player.isInit()) continue;
         checkKeys();
+
+        if (!player.isInit()) {
+            this_thread::sleep_for(chrono::milliseconds(100));
+            continue;
+        }
+
+        getEntities(entities);
 
         if (radarhack) {
             getEntities(entities);
@@ -64,6 +80,31 @@ int main() {
                 entity.setSpotted(true);
             }
         }
+
+        if (glow) {
+            getEntities(entities);
+            uintptr_t localPlayerAddress = player.getAddress();
+
+            for (Entity &entity : entities) {
+                if (entity.isInit() && !entity.getDormant()) {
+                    if (entity.getTeamNum() != player.getTeamNum()) {
+                        entity.setGlow(enemyGlowColor);
+                    } else if (entity.getAddress() != localPlayerAddress) {
+                        entity.setGlow(teamGlowColor);
+                    }
+                }
+            }
+            wasGlowEnabled = true;
+        } else if (wasGlowEnabled) {
+            getEntities(entities);
+            for (Entity &entity : entities) {
+                if (entity.isInit()) {
+                    entity.disableGlow();
+                }
+            }
+            wasGlowEnabled = false;
+        }
+
 
         if (bunnyhop) {
             if (GetAsyncKeyState(VK_SPACE) & 0x8000) {

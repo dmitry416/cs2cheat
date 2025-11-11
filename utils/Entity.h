@@ -20,6 +20,11 @@ public:
 
     void setSpotted(bool value);
 
+    void setGlow(const Color& color);
+    void disableGlow();
+
+    uintptr_t getAddress() const;
+
     bool isInit();
 
     glm::vec3 getLocalEyePos();

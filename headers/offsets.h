@@ -24,6 +24,10 @@ namespace offsets {
     constexpr ::std::ptrdiff_t m_modelState = 0x190;
     constexpr ::std::ptrdiff_t m_pGameSceneNode = 0x330;
 
+    constexpr ::std::ptrdiff_t m_Glow = 0xCB0;
+    constexpr ::std::ptrdiff_t m_glowColorOverride = 0x40;
+    constexpr ::std::ptrdiff_t m_bGlowing = 0x51;
+    constexpr ::std::ptrdiff_t m_iGlowType = 0x30;
 
     inline uintptr_t dwEntityList = 0x1D0FBE8;
     inline uintptr_t dwLocalPlayerPawn = 0x1BEAEB8;
