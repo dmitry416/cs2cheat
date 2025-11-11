@@ -7,6 +7,7 @@ using namespace offsets;
 
 bool radarhack = false;
 bool bunnyhop = false;
+bool antiflash = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
@@ -22,6 +23,11 @@ void checkKeys() {
     if (GetAsyncKeyState(VK_F6) & 1) {
         bunnyhop = !bunnyhop;
         cout << "[Toggle] bunnyhop = " << (bunnyhop ? "ON" : "OFF") << endl;
+    }
+
+    if (GetAsyncKeyState(VK_F7) & 1) {
+        antiflash = !antiflash;
+        cout << "[Toggle] antiflash = " << (antiflash ? "ON" : "OFF") << endl;
     }
 }
 
@@ -60,6 +66,12 @@ int main() {
                 else
                     player.setJump(JUMP_OFF);
             }
+        }
+
+        if (antiflash) {
+            if (Player.getFlashDuration == 0.0f) continue;
+
+            Player.setFlashDuration()
         }
 
         this_thread::sleep_for(chrono::milliseconds(10));

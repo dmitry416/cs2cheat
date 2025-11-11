@@ -21,6 +21,8 @@ namespace offsets {
     constexpr ::std::ptrdiff_t my_dwEntityList2= 0x1B7EF0;
     constexpr ::std::ptrdiff_t dwForceJump = 0x1BE4830;
     constexpr ::std::ptrdiff_t m_fFlags = 0x3F8;
+    constexpr ::std::ptrdiff_t m_flFlashDuration = 0x1348;
+
 
     inline uintptr_t dwEntityList = 0x1D0C9F8;
     inline uintptr_t dwLocalPlayerPawn = 0x1BEAEB8;

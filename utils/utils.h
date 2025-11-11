@@ -21,5 +21,7 @@ template<typename T> void WPM(uintptr_t address, T buffer);
 void checkKeys();
 bool init();
 void getEntities(vector<Entity>& entities);
+float getFlashDuration();
+void setFlashDuration();
 
 #endif
