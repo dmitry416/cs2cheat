@@ -50,6 +50,11 @@ void checkKeys() {
         trigger = !trigger;
         cout << "[Toggle] Trigger bot = " << (trigger ? "ON" : "OFF") << endl;
     }
+
+    if (GetAsyncKeyState(VK_F4) & 1) {
+        trigger = !trigger;
+        cout << "[Toggle] Trigger bot = " << (trigger ? "ON" : "OFF") << endl;
+    }
 }
 
 
