@@ -18,6 +18,10 @@ public:
 
     bool getDormant();
 
+    int getFFlag();
+
+    void setJump(int value);
+
     bool isInit();
 };
 

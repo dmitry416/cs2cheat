@@ -37,3 +37,13 @@ bool Player::isInit() {
 
     return true;
 }
+
+int Player::getFFlag() {
+    updateAddress();
+    if (!address) return 0;
+    return RPM<int>(address + m_fFlags);
+}
+
+void Player::setJump(int value) {
+    WPM(BaseAddress + dwForceJump, value);
+}
