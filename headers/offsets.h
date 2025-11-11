@@ -20,10 +20,7 @@ namespace offsets {
     constexpr ::std::ptrdiff_t m_flFlashDuration = 0x1610;
     constexpr ::std::ptrdiff_t m_vOldOrigin = 0x15A0;
     constexpr ::std::ptrdiff_t m_vecViewOffset = 0xD80;
-    constexpr ::std::ptrdiff_t m_lifeState = 0x354;
-    constexpr ::std::ptrdiff_t m_modelState = 0x190;
-    constexpr ::std::ptrdiff_t m_pGameSceneNode = 0x330;
-
+    constexpr ::std::ptrdiff_t m_iIDEntIndex = 0x3ECC;;
     constexpr ::std::ptrdiff_t m_Glow = 0xCB0;
     constexpr ::std::ptrdiff_t m_glowColorOverride = 0x40;
     constexpr ::std::ptrdiff_t m_bGlowing = 0x51;
@@ -32,6 +29,6 @@ namespace offsets {
     inline uintptr_t dwEntityList = 0x1D0FBE8;
     inline uintptr_t dwLocalPlayerPawn = 0x1BEAEB8;
     constexpr ::std::ptrdiff_t dwViewAngles = 0x1E38670;
-    constexpr ::std::ptrdiff_t dwViewMatrix = 0x1E2E0F0;
     constexpr ::std::ptrdiff_t dwForceJump = 0x1BE4830;
+    constexpr ::std::ptrdiff_t dwForceAttack = 0x1BE4320;
 }

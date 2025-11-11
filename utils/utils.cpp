@@ -90,6 +90,7 @@ bool init() {
     }
 
     cout << "\n==========================" << endl;
+    cout << "Trigger bot [F4]" << endl;
     cout << "RadarHack   [F5]" << endl;
     cout << "Bunnyhop    [F6]" << endl;
     cout << "Anti-flash  [F7]" << endl;

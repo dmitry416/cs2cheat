@@ -31,6 +31,10 @@ public:
     bool isInit();
 
     glm::vec3 getLocalEyePos();
+
+    int getCrosshairID();
+
+    void setAttack(int value);
 };
 
 
