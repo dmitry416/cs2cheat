@@ -33,8 +33,10 @@ void Entity::setSpotted(bool value) {
 void Entity::setGlow(const Color& color) {
     if (!address) return;
     uintptr_t glowProperty = address + offsets::m_Glow;
+    
     WPM<bool>(glowProperty + offsets::m_bGlowing, true);
     WPM<Color>(glowProperty + offsets::m_glowColorOverride, color);
+    WPM<int>(glowProperty + offsets::m_iGlowType, 3);
 }
 
 void Entity::disableGlow() {
