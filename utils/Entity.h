@@ -23,6 +23,8 @@ public:
     void setGlow(const Color& color);
     void disableGlow();
 
+    uintptr_t getAddress() const;
+
     bool isInit();
 };
 

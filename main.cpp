@@ -38,12 +38,6 @@ int main() {
         return 1;
     }
 
-    cout << "\n==========================" << endl;
-    cout << "RadarHack [F5]" << endl;
-    cout << "Bunnyhop  [F6]" << endl;
-    cout << "Glow      [F7]" << endl;
-    cout << "==========================" << endl;
-
     Player player;
     vector<Entity> entities;
     entities.reserve(64);
@@ -51,6 +45,7 @@ int main() {
     bool wasGlowEnabled = false;
 
     const Color enemyGlowColor = {255, 0, 0, 255}; 
+    const Color teamGlowColor  = {0, 150, 255, 255};
 
     for (;;) {
         checkKeys();
@@ -62,6 +57,8 @@ int main() {
 
         getEntities(entities);
 
+        uintptr_t localPlayerAddress = player.getAddress();
+
         if (radarhack) {
             for (Entity &entity : entities) {
                 if (entity.isInit() && !entity.getDormant() && entity.getTeamNum() != player.getTeamNum()) {
@@ -72,8 +69,12 @@ int main() {
 
         if (glow) {
             for (Entity &entity : entities) {
-                if (entity.isInit() && !entity.getDormant() && entity.getTeamNum() != player.getTeamNum()) {
-                    entity.setGlow(enemyGlowColor);
+                if (entity.isInit() && !entity.getDormant()) {
+                    if (entity.getTeamNum() != player.getTeamNum()) {
+                        entity.setGlow(enemyGlowColor);
+                    } else if (entity.getAddress() != localPlayerAddress) { 
+                        entity.setGlow(teamGlowColor);
+                    }
                 }
             }
         } else if (wasGlowEnabled) {

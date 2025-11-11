@@ -43,6 +43,10 @@ void Entity::disableGlow() {
     WPM<bool>(glowProperty + offsets::m_bGlowing, false);
 }
 
+uintptr_t Entity::getAddress() const {
+    return address;
+}
+
 bool Entity::isInit() {
     if (!address) return false;
 

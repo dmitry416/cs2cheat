@@ -22,6 +22,8 @@ public:
 
     void setJump(int value);
 
+    uintptr_t getAddress();
+
     bool isInit();
 };
 
