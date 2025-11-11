@@ -77,8 +77,8 @@ int main() {
         }
 
         if (antiflash) {
-            if (player.getFlashDuration() == 0) continue;
-            player.setFlashDuration(0);
+            if (player.getFlashDuration() != 0)
+                player.setFlashDuration(0);
         }
 
         if (aimbot && GetAsyncKeyState(VK_SHIFT) & 0x8000) {
