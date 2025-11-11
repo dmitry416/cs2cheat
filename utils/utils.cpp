@@ -44,9 +44,11 @@ void WPM(uintptr_t address, T buffer) {
 
 
 template int RPM<int>(uintptr_t);
+template float RPM<float>(uintptr_t);
 template bool RPM<bool>(uintptr_t);
 template uintptr_t RPM<uintptr_t>(uintptr_t);
 template void WPM<int>(uintptr_t, int);
+template void WPM<float>(uintptr_t, float);
 template void WPM<bool>(uintptr_t, bool);
 
 bool init() {

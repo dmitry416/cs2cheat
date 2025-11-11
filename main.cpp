@@ -69,9 +69,8 @@ int main() {
         }
 
         if (antiflash) {
-            if (Player.getFlashDuration == 0.0f) continue;
-
-            Player.setFlashDuration()
+            if (player.getFlashDuration() == 0.0f) continue;
+            player.setFlashDuration(0);
         }
 
         this_thread::sleep_for(chrono::milliseconds(10));
