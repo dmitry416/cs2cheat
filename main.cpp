@@ -8,11 +8,15 @@ using namespace offsets;
 bool radarhack = false;
 bool bunnyhop = false;
 bool antiflash = false;
+bool aimbot = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
 const int JUMP_ON = 65537;
 const int JUMP_OFF = 256;
+
+const float maxAimAngle = 5.0f;
+const float maxDistance = 1000;
 
 void checkKeys() {
     if (GetAsyncKeyState(VK_F5) & 1) {
@@ -29,6 +33,11 @@ void checkKeys() {
         antiflash = !antiflash;
         cout << "[Toggle] antiflash = " << (antiflash ? "ON" : "OFF") << endl;
     }
+
+    if (GetAsyncKeyState(VK_F8) & 1) {
+        aimbot = !aimbot;
+        cout << "[Toggle] aimbot = " << (aimbot ? "ON" : "OFF") << endl;
+    }
 }
 
 
@@ -44,10 +53,10 @@ int main() {
     entities.reserve(64);
 
     for (;;) {
+        if (!player.isInit()) continue;
         checkKeys();
 
         if (radarhack) {
-            if (!player.isInit()) continue;
             getEntities(entities);
             for (Entity &entity: entities) {
                 if (!entity.isInit()) continue;
@@ -69,8 +78,43 @@ int main() {
         }
 
         if (antiflash) {
-            if (player.getFlashDuration() == 0.0f) continue;
+            if (player.getFlashDuration() == 0) continue;
             player.setFlashDuration(0);
+        }
+
+        if (aimbot && GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+            getEntities(entities);
+
+            float smallestFOV = maxAimAngle;
+            vec3 bestEnemyPos;
+            int playerTeam = player.getTeamNum();
+            vec3 playerEyePos = player.getLocalEyePos();
+            vec3 currentViewAngles = RPM<vec3>(BaseAddress + dwViewAngles);
+
+            for (Entity &entity : entities) {
+                if (entity.getDormant() || entity.getTeamNum() == playerTeam) continue;
+
+                vec3 entityEyePos = entity.getLocalEyePos();
+
+                float distance = getDistance(playerEyePos, entityEyePos);
+                if (distance > maxDistance) continue;
+
+                vec3 delta = entityEyePos - playerEyePos;
+                vec3 viewForward = AnglesToForward(currentViewAngles);
+
+                float dotProduct = dot(normalize(delta), viewForward);
+                float fov = acos(dotProduct) * (180.0f / pi<float>());
+
+                if (fov < smallestFOV) {
+                    smallestFOV = fov;
+                    bestEnemyPos = entityEyePos;
+                }
+            }
+
+            if (smallestFOV < maxAimAngle) {
+                vec3 targetAngle = CalculateViewAngles(playerEyePos, bestEnemyPos);
+                WPM<vec3>(BaseAddress + dwViewAngles, targetAngle);
+            }
         }
 
         this_thread::sleep_for(chrono::milliseconds(10));

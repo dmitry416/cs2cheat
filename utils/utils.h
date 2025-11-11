@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace offsets;
+using namespace glm;
 
 class Entity;
 
@@ -23,5 +24,8 @@ bool init();
 void getEntities(vector<Entity>& entities);
 float getFlashDuration();
 void setFlashDuration();
+float getDistance(vec3 p1, vec3 p2);
+vec3 AnglesToForward(vec3 angles);
+vec3 CalculateViewAngles(vec3 source, vec3 destination);
 
 #endif

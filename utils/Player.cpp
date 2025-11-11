@@ -61,3 +61,8 @@ void Player::setFlashDuration(float value) {
 void Player::setJump(int value) {
     WPM(BaseAddress + dwForceJump, value);
 }
+
+glm::vec3 Player::getLocalEyePos() {
+    return RPM<glm::vec3>(address + m_vOldOrigin) +
+            RPM<vec3>(address + m_vecViewOffset);
+}

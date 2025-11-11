@@ -50,6 +50,8 @@ template uintptr_t RPM<uintptr_t>(uintptr_t);
 template void WPM<int>(uintptr_t, int);
 template void WPM<float>(uintptr_t, float);
 template void WPM<bool>(uintptr_t, bool);
+template vec3 RPM<vec3>(uintptr_t);
+template void WPM<vec3>(uintptr_t, vec3);
 
 bool init() {
     hwnd = FindWindowA(nullptr, "Counter-Strike 2");
@@ -82,6 +84,7 @@ bool init() {
     cout << "RadarHack [F5]" << endl;
     cout << "Bunnyhop  [F6]" << endl;
     cout << "Anti-flash  [F7]" << endl;
+    cout << "Aimbot  [F8]" << endl;
     cout << "==========================" << endl;
 
     return true;
@@ -105,4 +108,28 @@ void getEntities(vector<Entity>& entities) {
         Entity entity(curPawn);
         if (entity.isInit()) entities.push_back(entity);
     }
+}
+
+float getDistance(vec3 p1, vec3 p2) {
+    return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2) + pow(p1.z - p2.z, 2));
+}
+
+vec3 AnglesToForward(vec3 angles) {
+    float pitch = angles.x * (pi<float>() / 180.0f);
+    float yaw = angles.y * (pi<float>() / 180.0f);
+
+    return vec3(
+            cos(pitch) * cos(yaw),
+            cos(pitch) * sin(yaw),
+            -sin(pitch)
+    );
+}
+
+vec3 CalculateViewAngles(vec3 source, vec3 destination) {
+    vec3 direction = destination - source;
+
+    float yaw = atan2(direction.y, direction.x) * (180.0f / pi<float>());
+    float pitch = -atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y)) * (180.0f / pi<float>());
+
+    return vec3(pitch, yaw, 0.0f);
 }
