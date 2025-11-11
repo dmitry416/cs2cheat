@@ -13,4 +13,8 @@
 
 #include "offsets.h"
 
+struct Color {
+    unsigned char r, g, b, a;
+};
+
 #endif

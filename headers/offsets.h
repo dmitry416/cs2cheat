@@ -20,6 +20,10 @@ namespace offsets {
     constexpr ::std::ptrdiff_t dwForceJump = 0x1BE4830;
     constexpr ::std::ptrdiff_t m_fFlags = 0x3F8;
 
+    constexpr ::std::ptrdiff_t m_Glow = 0xCB0;
+    constexpr ::std::ptrdiff_t m_glowColorOverride = 0x40;
+    constexpr ::std::ptrdiff_t m_bGlowing = 0x51;
+
     inline uintptr_t dwEntityList = 0x1D0FBE8;
     inline uintptr_t dwLocalPlayerPawn = 0x1BEAEB8;
 }

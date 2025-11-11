@@ -20,6 +20,9 @@ public:
 
     void setSpotted(bool value);
 
+    void setGlow(const Color& color);
+    void disableGlow();
+
     bool isInit();
 };
 

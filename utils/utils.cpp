@@ -48,6 +48,7 @@ template bool RPM<bool>(uintptr_t);
 template uintptr_t RPM<uintptr_t>(uintptr_t);
 template void WPM<int>(uintptr_t, int);
 template void WPM<bool>(uintptr_t, bool);
+template void WPM<Color>(uintptr_t, Color);
 
 bool init() {
     hwnd = FindWindowA(nullptr, "Counter-Strike 2");
@@ -79,6 +80,7 @@ bool init() {
     cout << "\n==========================" << endl;
     cout << "RadarHack [F5]" << endl;
     cout << "Bunnyhop  [F6]" << endl;
+    cout << "Glow      [F7]" << endl;
     cout << "==========================" << endl;
 
     return true;

@@ -7,6 +7,7 @@ using namespace offsets;
 
 bool radarhack = false;
 bool bunnyhop = false;
+bool glow = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
@@ -16,15 +17,19 @@ const int JUMP_OFF = 256;
 void checkKeys() {
     if (GetAsyncKeyState(VK_F5) & 1) {
         radarhack = !radarhack;
-        cout << "[Toggle] radarhack = " << (radarhack ? "ON" : "OFF") << endl;
+        cout << "[Toggle] RadarHack = " << (radarhack ? "ON" : "OFF") << endl;
     }
 
     if (GetAsyncKeyState(VK_F6) & 1) {
         bunnyhop = !bunnyhop;
-        cout << "[Toggle] bunnyhop = " << (bunnyhop ? "ON" : "OFF") << endl;
+        cout << "[Toggle] Bunnyhop = " << (bunnyhop ? "ON" : "OFF") << endl;
+    }
+
+    if (GetAsyncKeyState(VK_F7) & 1) {
+        glow = !glow;
+        cout << "[Toggle] Glow = " << (glow ? "ON" : "OFF") << endl;
     }
 }
-
 
 int main() {
     if (!init()) {
@@ -33,22 +38,53 @@ int main() {
         return 1;
     }
 
+    cout << "\n==========================" << endl;
+    cout << "RadarHack [F5]" << endl;
+    cout << "Bunnyhop  [F6]" << endl;
+    cout << "Glow      [F7]" << endl;
+    cout << "==========================" << endl;
+
     Player player;
     vector<Entity> entities;
     entities.reserve(64);
 
+    bool wasGlowEnabled = false;
+
+    const Color enemyGlowColor = {255, 0, 0, 255}; 
+
     for (;;) {
         checkKeys();
 
+        if (!player.isInit()) {
+            this_thread::sleep_for(chrono::milliseconds(100));
+            continue;
+        }
+
+        getEntities(entities);
+
         if (radarhack) {
-            if (!player.isInit()) continue;
-            getEntities(entities);
-            for (Entity &entity: entities) {
-                if (!entity.isInit()) continue;
-                if (entity.getDormant() || entity.getTeamNum() == player.getTeamNum()) continue;
-                entity.setSpotted(true);
+            for (Entity &entity : entities) {
+                if (entity.isInit() && !entity.getDormant() && entity.getTeamNum() != player.getTeamNum()) {
+                    entity.setSpotted(true);
+                }
             }
         }
+
+        if (glow) {
+            for (Entity &entity : entities) {
+                if (entity.isInit() && !entity.getDormant() && entity.getTeamNum() != player.getTeamNum()) {
+                    entity.setGlow(enemyGlowColor);
+                }
+            }
+        } else if (wasGlowEnabled) {
+            for (Entity &entity : entities) {
+                if (entity.isInit()) {
+                    entity.disableGlow();
+                }
+            }
+        }
+        wasGlowEnabled = glow;
+
 
         if (bunnyhop) {
             if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
@@ -56,9 +92,9 @@ int main() {
                 if (fflag == STANDING || fflag == CROUCHING) {
                     this_thread::sleep_for(chrono::milliseconds(1));
                     player.setJump(JUMP_ON);
-                }
-                else
+                } else {
                     player.setJump(JUMP_OFF);
+                }
             }
         }
 
