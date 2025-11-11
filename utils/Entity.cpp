@@ -33,11 +33,5 @@ void Entity::setSpotted(bool value) {
 bool Entity::isInit() {
     if (!address) return false;
 
-    int team = getTeamNum();
-    if (team < 2 || team > 3) return false;
-
-    int health = getHealth();
-    if (health < 0 || health > 100) return false;
-
     return true;
 }

@@ -86,13 +86,20 @@ bool init() {
 
 void getEntities(vector<Entity>& entities) {
     entities.clear();
-    for (int i = 0; i < 100; ++i) {
-        uintptr_t pawn = RPM<uintptr_t>(BaseAddress + my_dwEntityList + ((i / 2) * 0x10 + (i % 2 ? 0x8 : 0)));
-        if (!pawn) continue;
 
-        Entity entity(pawn);
-        if (entity.isInit()) {
-            entities.push_back(entity);
-        }
+    uintptr_t entityList = RPM<uintptr_t>(BaseAddress + dwEntityList);
+    uintptr_t listEntry = RPM<uintptr_t>(entityList + 0x10);
+
+    for (int i = 0; i < 64; ++i) {
+        if (!listEntry) continue;
+        uintptr_t curController = RPM<uintptr_t>(listEntry + i * 0x70);
+        int pawnHandle = RPM<int>(curController + m_hPlayerPawn);
+        if (!pawnHandle) continue;
+        uintptr_t listEntry2 = RPM<uintptr_t>(entityList + 0x8 * ((pawnHandle & 0x7FFF) >> 9) + 0x10);
+        uintptr_t curPawn = RPM<uintptr_t>(listEntry2 + 0x70 * (pawnHandle & 0x1FF));
+        if (!curPawn) continue;
+
+        Entity entity(curPawn);
+        if (entity.isInit()) entities.push_back(entity);
     }
 }
