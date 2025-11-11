@@ -20,6 +20,9 @@ public:
 
     int getFFlag();
 
+    float getFlashDuration();
+    void setFlashDuration();
+
     void setJump(int value);
 
     bool isInit();

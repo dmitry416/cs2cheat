@@ -44,6 +44,22 @@ int Player::getFFlag() {
     return RPM<int>(address + m_fFlags);
 }
 
+float Player::getFlashDuration() {
+    uintptr_t localPlayerPawn = RPM<uintptr_t>(BaseAddress + offsets::dwLocalPlayerPawn);
+
+    if (localPlayerPawn == 0) return 0.0f;
+
+    return RPM<float>(localPlayerPawn + offsets::m_flFlashDuration);
+}
+
+void Player::setFlashDuration() {
+    uintptr_t localPlayerPawn = RPM<uintptr_t>(BaseAddress + offsets::dwLocalPlayerPawn);
+
+    if (localPlayerPawn == 0) return;
+
+    WPM<float>(localPlayerPawn + offsets::m_flFlashDuration, 0.0f);
+}
+
 void Player::setJump(int value) {
     WPM(BaseAddress + dwForceJump, value);
 }
