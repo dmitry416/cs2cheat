@@ -64,5 +64,5 @@ void Player::setJump(int value) {
 
 glm::vec3 Player::getLocalEyePos() {
     return RPM<glm::vec3>(address + m_vOldOrigin) +
-            RPM<vec3>(address + m_vecViewOffset);
+           RPM<vec3>(address + m_vecViewOffset);
 }

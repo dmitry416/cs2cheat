@@ -21,6 +21,7 @@ public:
     int getFFlag();
 
     float getFlashDuration();
+
     void setFlashDuration(float value);
 
     void setJump(int value);

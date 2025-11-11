@@ -17,15 +17,23 @@ extern DWORD processtap;
 extern bool radarhack;
 
 uintptr_t GetModuleBaseAddress(const char *modName);
-template<typename T> T RPM(uintptr_t address);
-template<typename T> void WPM(uintptr_t address, T buffer);
+
+template<typename T>
+T RPM(uintptr_t address);
+
+template<typename T>
+void WPM(uintptr_t address, T buffer);
+
 void checkKeys();
+
 bool init();
-void getEntities(vector<Entity>& entities);
-float getFlashDuration();
-void setFlashDuration();
+
+void getEntities(vector<Entity> &entities);
+
 float getDistance(vec3 p1, vec3 p2);
+
 vec3 AnglesToForward(vec3 angles);
+
 vec3 CalculateViewAngles(vec3 source, vec3 destination);
 
 #endif

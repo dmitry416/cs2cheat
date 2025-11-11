@@ -19,7 +19,7 @@ uintptr_t GetModuleBaseAddress(const char *modName) {
         do {
             if (strcmp(modEntry.szModule, modName) == 0) {
                 CloseHandle(hSnap);
-                return (uintptr_t)modEntry.modBaseAddr;
+                return (uintptr_t) modEntry.modBaseAddr;
             }
         } while (Module32Next(hSnap, &modEntry));
     }
@@ -31,7 +31,7 @@ uintptr_t GetModuleBaseAddress(const char *modName) {
 template<typename T>
 T RPM(uintptr_t address) {
     T buffer;
-    if (!ReadProcessMemory(hProcess, (LPCVOID)address, &buffer, sizeof(T), nullptr)) {
+    if (!ReadProcessMemory(hProcess, (LPCVOID) address, &buffer, sizeof(T), nullptr)) {
         return T();
     }
     return buffer;
@@ -39,18 +39,26 @@ T RPM(uintptr_t address) {
 
 template<typename T>
 void WPM(uintptr_t address, T buffer) {
-    WriteProcessMemory(hProcess, (LPVOID)address, &buffer, sizeof(buffer), nullptr);
+    WriteProcessMemory(hProcess, (LPVOID) address, &buffer, sizeof(buffer), nullptr);
 }
 
 
 template int RPM<int>(uintptr_t);
+
 template float RPM<float>(uintptr_t);
+
 template bool RPM<bool>(uintptr_t);
+
 template uintptr_t RPM<uintptr_t>(uintptr_t);
+
 template void WPM<int>(uintptr_t, int);
+
 template void WPM<float>(uintptr_t, float);
+
 template void WPM<bool>(uintptr_t, bool);
+
 template vec3 RPM<vec3>(uintptr_t);
+
 template void WPM<vec3>(uintptr_t, vec3);
 
 bool init() {
@@ -90,7 +98,7 @@ bool init() {
     return true;
 }
 
-void getEntities(vector<Entity>& entities) {
+void getEntities(vector<Entity> &entities) {
     entities.clear();
 
     uintptr_t entityList = RPM<uintptr_t>(BaseAddress + dwEntityList);
@@ -129,7 +137,8 @@ vec3 CalculateViewAngles(vec3 source, vec3 destination) {
     vec3 direction = destination - source;
 
     float yaw = atan2(direction.y, direction.x) * (180.0f / pi<float>());
-    float pitch = -atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y)) * (180.0f / pi<float>());
+    float pitch =
+            -atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y)) * (180.0f / pi<float>());
 
     return vec3(pitch, yaw, 0.0f);
 }

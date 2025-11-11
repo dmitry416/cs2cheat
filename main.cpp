@@ -71,8 +71,7 @@ int main() {
                 if (fflag == STANDING || fflag == CROUCHING) {
                     this_thread::sleep_for(chrono::milliseconds(1));
                     player.setJump(JUMP_ON);
-                }
-                else
+                } else
                     player.setJump(JUMP_OFF);
             }
         }
@@ -91,7 +90,7 @@ int main() {
             vec3 playerEyePos = player.getLocalEyePos();
             vec3 currentViewAngles = RPM<vec3>(BaseAddress + dwViewAngles);
 
-            for (Entity &entity : entities) {
+            for (Entity &entity: entities) {
                 if (entity.getDormant() || entity.getTeamNum() == playerTeam) continue;
 
                 vec3 entityEyePos = entity.getLocalEyePos();
