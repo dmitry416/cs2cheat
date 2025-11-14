@@ -17,8 +17,8 @@ const int CROUCHING = 65667;
 const int JUMP_ON = 65537;
 const int JUMP_OFF = 256;
 
-const float maxAimAngle = 5.0f;
-const float maxDistance = 1000;
+const float maxAimAngle = 6.0f;
+const float maxDistance = 1500;
 
 void checkKeys() {
     if (GetAsyncKeyState(VK_F5) & 1) {
@@ -50,11 +50,6 @@ void checkKeys() {
         trigger = !trigger;
         cout << "[Toggle] Trigger bot = " << (trigger ? "ON" : "OFF") << endl;
     }
-
-    if (GetAsyncKeyState(VK_F4) & 1) {
-        trigger = !trigger;
-        cout << "[Toggle] Trigger bot = " << (trigger ? "ON" : "OFF") << endl;
-    }
 }
 
 
@@ -74,13 +69,11 @@ int main() {
     const Color teamGlowColor  = {0, 150, 255, 255};
 
     for (;;) {
-        if (!player.isInit() || player.getDormant()) continue;
-        checkKeys();
-
         if (!player.isInit()) {
             this_thread::sleep_for(chrono::milliseconds(100));
             continue;
         }
+        checkKeys();
 
         getEntities(entities);
 
@@ -88,7 +81,7 @@ int main() {
             getEntities(entities);
             for (Entity &entity: entities) {
                 if (!entity.isInit()) continue;
-                if (entity.getDormant() || entity.getTeamNum() == player.getTeamNum()) continue;
+                if (entity.getHealth() <= 0 || entity.getTeamNum() == player.getTeamNum()) continue;
                 entity.setSpotted(true);
             }
         }
@@ -98,7 +91,7 @@ int main() {
             uintptr_t localPlayerAddress = player.getAddress();
 
             for (Entity &entity : entities) {
-                if (entity.isInit() && !entity.getDormant()) {
+                if (entity.isInit() && entity.getHealth() > 0) {
                     if (entity.getTeamNum() != player.getTeamNum()) {
                         entity.setGlow(enemyGlowColor);
                     } else if (entity.getAddress() != localPlayerAddress) {
@@ -144,7 +137,7 @@ int main() {
             vec3 currentViewAngles = RPM<vec3>(BaseAddress + dwViewAngles);
 
             for (Entity &entity: entities) {
-                if (entity.getDormant() || entity.getTeamNum() == playerTeam) continue;
+                if (entity.getHealth() <= 0 || entity.getTeamNum() == playerTeam) continue;
 
                 vec3 entityEyePos = entity.getLocalEyePos();
 
