@@ -81,3 +81,9 @@ int Player::getCrosshairID() {
 void Player::setAttack(int value) {
     WPM<int>(BaseAddress + dwForceAttack, value);
 }
+
+long long Player::getSteamID() {
+    uintptr_t controller = RPM<uintptr_t>(BaseAddress + dwLocalPlayerController);
+    if (!controller) return 0;
+    return RPM<long long>(controller + m_steamID);;
+}

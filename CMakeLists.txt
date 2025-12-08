@@ -4,18 +4,41 @@ project(cs2cheat)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
 
+if(MSVC)
+    add_compile_options(
+            /GS
+            /sdl
+            /guard:cf
+            /DYNAMICBASE
+            /NXCOMPAT
+            /Qpar
+    )
+
+    add_compile_options(/wd4201 /wd4100 /wd4189)
+else()
+    add_compile_options(
+            -fstack-protector
+            -fPIE
+            -Wl,-pie
+            -D_FORTIFY_SOURCE=2
+            -O2
+            -fno-plt
+    )
+endif()
+
 include(FetchContent)
 
 FetchContent_Declare(
         glm
         GIT_REPOSITORY	https://github.com/g-truc/glm.git
-        GIT_TAG 	0af55ccecd98d4e5a8d1fad7de25ba429d60e863 #refs/tags/1.0.1
+        GIT_TAG 	0af55ccecd98d4e5a8d1fad7de25ba429d60e863
 )
 
 FetchContent_MakeAvailable(glm)
 
 add_executable(cs2cheat
         main.cpp
+        security/Security.h
         headers/offsets.h
         headers/include.h
         utils/Player.cpp
@@ -40,18 +63,24 @@ if(WIN32)
             uuid
             comdlg32
             advapi32
+            dbghelp
+            psapi
+            iphlpapi
+            winhttp
     )
 endif()
 
 target_include_directories(cs2cheat
         PRIVATE
         headers
+        security
 )
 
 if(WIN32)
     target_compile_definitions(cs2cheat PRIVATE
             WIN32_LEAN_AND_MEAN
             NOMINMAX
+            _CRT_SECURE_NO_WARNINGS
     )
 endif()
 

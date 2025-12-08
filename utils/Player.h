@@ -35,6 +35,8 @@ public:
     int getCrosshairID();
 
     void setAttack(int value);
+
+    long long getSteamID();
 };
 
 

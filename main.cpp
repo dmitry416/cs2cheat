@@ -1,6 +1,8 @@
+#include <atomic>
 #include "utils/utils.h"
 #include "utils/Entity.h"
 #include "utils/Player.h"
+#include "security/Security.h"
 
 using namespace std;
 using namespace offsets;
@@ -12,6 +14,9 @@ bool aimbot = false;
 bool glow = false;
 bool trigger = false;
 
+atomic<bool> isActivated = false;
+atomic<bool> shouldExit = false;
+
 const int STANDING = 65665;
 const int CROUCHING = 65667;
 const int JUMP_ON = 65537;
@@ -19,6 +24,19 @@ const int JUMP_OFF = 256;
 
 const float maxAimAngle = 6.0f;
 const float maxDistance = 1500;
+
+void ActivationChecker() {
+    const chrono::seconds checkInterval(10);
+
+    while (!shouldExit) {
+        if (!Security::Initialize()) {
+            std::cout << "Security check failed!" << std::endl;
+            shouldExit = true;
+            ExitProcess(1);
+        }
+        this_thread::sleep_for(checkInterval);
+    }
+}
 
 void checkKeys() {
     if (GetAsyncKeyState(VK_F5) & 1) {
@@ -54,11 +72,20 @@ void checkKeys() {
 
 
 int main() {
+    thread checkerThread(ActivationChecker);
+    checkerThread.detach();
+
     if (!init()) {
         cout << "Press ENTER to exit..." << endl;
         cin.get();
         return 1;
     }
+
+    std::string key;
+
+    cout << "Enter the activation key: ";
+    cin >> key;
+    cout << "The key is entered. If it is correct, the cheat will work. Good luck ;)\n";
 
     Player player;
     vector<Entity> entities;
@@ -68,10 +95,17 @@ int main() {
     const Color enemyGlowColor = {255, 0, 0, 255};
     const Color teamGlowColor  = {0, 150, 255, 255};
 
-    for (;;) {
+    for (;!shouldExit;) {
         if (!player.isInit()) {
             this_thread::sleep_for(chrono::milliseconds(100));
             continue;
+        }
+        if (!isActivated && !Security::VerifyActivation(key, to_string(player.getSteamID()))) {
+            cout << "Activation failed!" << std::endl;
+            return 1;
+        }
+        else {
+            isActivated = true;
         }
         checkKeys();
 

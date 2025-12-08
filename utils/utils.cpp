@@ -44,6 +44,7 @@ void WPM(uintptr_t address, T buffer) {
 
 
 template int RPM<int>(uintptr_t);
+template long long RPM<long long>(uintptr_t);
 
 template float RPM<float>(uintptr_t);
 
