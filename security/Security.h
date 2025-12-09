@@ -141,7 +141,7 @@ private:
                 return false;
             }
 
-            hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/verify",
+            hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/verify/",
                                           nullptr, WINHTTP_NO_REFERER,
                                           WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
             if (!hRequest) {
@@ -186,7 +186,7 @@ private:
             WinHttpCloseHandle(hConnect);
             WinHttpCloseHandle(hSession);
 
-            return response.find("\"status\": \"success\"") != std::string::npos;
+            return response.find("success") != std::string::npos;
 
         } catch (...) {
             if (hRequest) WinHttpCloseHandle(hRequest);

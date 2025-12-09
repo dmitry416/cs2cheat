@@ -1,120 +1,111 @@
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-import json
-from .models import LicenseKey, ActivationLog
-from django.core.validators import validate_integer
+import logging
+
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_integer
+from django.shortcuts import render
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from .exceptions import KeyBanned, KeyMismatch, KeyNotFound, SteamIDInvalid
+from .models import ActivationLog, LicenseKey
+
+logger = logging.getLogger("keys")
 
 
 def home(request):
-    """Главная страница для получения ключа"""
-    return render(request, 'index.html')
+    return render(request, "index.html")
 
-@csrf_exempt
-@require_POST
-def verify_key(request):
+
+def validate_steamid(steamid):
+    if not steamid:
+        raise SteamIDInvalid("SteamID is required")
     try:
-        data = json.loads(request.body.decode('utf-8'))
-        key = data.get('key', '').strip()
-        steamid = data.get('steamid', '').strip()
+        validate_integer(steamid)
+    except ValidationError:
+        raise SteamIDInvalid("Invalid SteamID format")
+    if len(steamid) < 15 or len(steamid) > 20:
+        raise SteamIDInvalid("Invalid SteamID length")
 
-        try:
-            validate_integer(steamid)
-        except ValidationError:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Invalid SteamID format'
-            }, status=400)
 
-        try:
-            license_key = LicenseKey.objects.get(key=key, is_active=True)
-        except LicenseKey.DoesNotExist:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Invalid or inactive key'
-            })
+@api_view(["POST"])
+def verify_key(request):
+    key = request.data.get("key", "").strip()
+    steamid = request.data.get("steamid", "").strip()
+    client_ip = request.META.get("REMOTE_ADDR")
 
-        if license_key.steam_id != steamid:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Key not assigned to this Steam account'
-            })
+    logger.info(f"Incoming verify request from IP: {client_ip}")
+    logger.info(f"Received DATA -> Key: '{key}', SteamID: '{steamid}'")
 
-        license_key.last_used = timezone.now()
-        license_key.save()
+    validate_steamid(steamid)
 
+    license_key = LicenseKey.objects.filter(key=key).first()
+
+    if not license_key:
+        logger.warning(f"Failed: Key '{key}' not found in DB.")
+        raise KeyNotFound("Invalid key")
+
+    if not license_key.is_active:
+        logger.warning(f"Failed: Key '{key}' is BANNED.")
         ActivationLog.objects.create(
-            key=license_key,
-            ip_address=request.META.get('REMOTE_ADDR'),
-            success=True
+            key=license_key, ip_address=client_ip, success=False
+        )
+        raise KeyBanned("Key is banned or inactive")
+
+    if license_key.steam_id != steamid:
+        logger.error(
+            f"MISMATCH! Key owner: '{license_key.steam_id}' vs Request SteamID: '{steamid}'"
+        )
+        ActivationLog.objects.create(
+            key=license_key, ip_address=client_ip, success=False
+        )
+        raise KeyMismatch("Key not assigned to this Steam account")
+
+    license_key.mark_used()
+    ActivationLog.objects.create(key=license_key, ip_address=client_ip, success=True)
+
+    logger.info(f"SUCCESS! Key verified for SteamID: {steamid}")
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Key verified successfully",
+            "created_at": license_key.created_at,
+        }
+    )
+
+
+@api_view(["POST"])
+def request_key(request):
+    steamid = request.data.get("steam_id", "").strip()
+    client_ip = request.META.get("REMOTE_ADDR")
+
+    logger.info(f"Requesting NEW key for SteamID: '{steamid}' from {client_ip}")
+
+    validate_steamid(steamid)
+
+    existing_key = LicenseKey.objects.filter(steam_id=steamid).first()
+    if existing_key:
+        if not existing_key.is_active:
+            logger.warning(f"Request denied: SteamID '{steamid}' is banned.")
+            raise KeyBanned("Your key has been banned")
+
+        logger.info(f"Returning EXISTING key for '{steamid}'")
+        return Response(
+            {
+                "status": "success",
+                "message": "Key already exists",
+                "key": existing_key.key,
+            }
         )
 
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Key verified successfully',
-            'created_at': license_key.created_at.isoformat()
-        })
+    new_key = LicenseKey.objects.create(steam_id=steamid)
+    logger.info(f"Generated NEW key for '{steamid}'")
 
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Invalid JSON'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
-
-
-@csrf_exempt
-@require_POST
-def request_key(request):
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-        steamid = data.get('steam_id', '').strip()
-
-        try:
-            validate_integer(steamid)
-        except ValidationError:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Invalid SteamID format'
-            }, status=400)
-
-        if len(steamid) < 15 or len(steamid) > 20:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Invalid SteamID length'
-            }, status=400)
-
-        existing_key = LicenseKey.objects.filter(steam_id=steamid, is_active=True).first()
-
-        if existing_key:
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Key already exists for this SteamID',
-                'key': existing_key.key
-            })
-
-        new_key = LicenseKey.objects.create(steam_id=steamid)
-
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Key generated successfully',
-            'key': new_key.key
-        })
-
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Invalid JSON'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
+    return Response(
+        {
+            "status": "success",
+            "message": "Key generated successfully",
+            "key": new_key.key,
+        },
+        status=201,
+    )
