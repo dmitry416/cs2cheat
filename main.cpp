@@ -4,7 +4,6 @@
 #include "utils/utils.h"
 #include "utils/Player.h"
 #include "utils/Entity.h"
-#include "security/Security.h"
 #include "ui/Overlay.h"
 
 using namespace std;
@@ -19,22 +18,11 @@ bool glow = false;
 bool trigger = false;
 
 atomic<bool> shouldExit = false;
-atomic<bool> g_IsAuthenticated = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
 const int JUMP_ON = 65537;
 const int JUMP_OFF = 256;
-
-void SecurityLoop() {
-    for (;!shouldExit;) {
-        if (!Security::Initialize()) {
-            shouldExit = true;
-            ExitProcess(1);
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(10));
-    }
-}
 
 void CheatLoop() {
     Player player;
@@ -43,11 +31,6 @@ void CheatLoop() {
     bool wasGlowEnabled = false;
 
     for (;!shouldExit;) {
-        if (!g_IsAuthenticated) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            continue;
-        }
-
         if (!player.isInit()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
@@ -145,8 +128,6 @@ int main() {
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
     if (!init()) return 1;
 
-    thread sec(SecurityLoop);
-    sec.detach();
     thread cheat(CheatLoop);
     cheat.detach();
 

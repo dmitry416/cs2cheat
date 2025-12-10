@@ -5,7 +5,6 @@
 
 extern bool radarhack, bunnyhop, antiflash, aimbot, glow, trigger;
 extern std::atomic<bool> shouldExit;
-extern std::atomic<bool> g_IsAuthenticated;
 
 class Overlay {
 public:
@@ -17,8 +16,6 @@ public:
 
 private:
     static void HandleInput();
-
-    static void DrawAuth();
 
     static void DrawMenu();
 

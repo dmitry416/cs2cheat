@@ -1,5 +1,4 @@
 #include "Overlay.h"
-#include "../security/Security.h"
 #include "../utils/Player.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -16,8 +15,6 @@ HWND Overlay::window = nullptr;
 
 static bool isVisible = true;
 static bool isMoveMode = false;
-static char keyBuffer[64] = "";
-static std::string statusMsg = "";
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -96,13 +93,12 @@ void Overlay::HandleInput() {
 
             if (!isVisible) SetInputPassThrough(true);
             else {
-                if (!g_IsAuthenticated) SetInputPassThrough(false);
-                else SetInputPassThrough(!isMoveMode);
+                SetInputPassThrough(!isMoveMode);
             }
         }
     } else toggleInsert = false;
 
-    if (g_IsAuthenticated && isVisible) {
+    if (isVisible) {
         if (GetAsyncKeyState(VK_HOME) & 0x8000) {
             if (!toggleHome) {
                 isMoveMode = !isMoveMode;
@@ -114,23 +110,21 @@ void Overlay::HandleInput() {
 
     if (GetAsyncKeyState(VK_END) & 0x8000) shouldExit = true;
 
-    if (g_IsAuthenticated) {
-        struct Key {
-            int k;
-            bool *v;
-        };
-        static std::vector<Key> keys = {{VK_F4, &trigger},
-                                        {VK_F5, &radarhack},
-                                        {VK_F6, &bunnyhop},
-                                        {VK_F7, &antiflash},
-                                        {VK_F8, &aimbot},
-                                        {VK_F9, &glow}};
-        static bool keyState[256] = {0};
-        for (auto &item: keys) {
-            bool down = GetAsyncKeyState(item.k) & 0x8000;
-            if (down && !keyState[item.k]) *item.v = !(*item.v);
-            keyState[item.k] = down;
-        }
+    struct Key {
+        int k;
+        bool *v;
+    };
+    static std::vector<Key> keys = {{VK_F4, &trigger},
+                                    {VK_F5, &radarhack},
+                                    {VK_F6, &bunnyhop},
+                                    {VK_F7, &antiflash},
+                                    {VK_F8, &aimbot},
+                                    {VK_F9, &glow}};
+    static bool keyState[256] = {0};
+    for (auto &item: keys) {
+        bool down = GetAsyncKeyState(item.k) & 0x8000;
+        if (down && !keyState[item.k]) *item.v = !(*item.v);
+        keyState[item.k] = down;
     }
 }
 
@@ -149,13 +143,10 @@ void Overlay::RenderLoop() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        bool needCursor = (isVisible && (!g_IsAuthenticated || isMoveMode));
+        bool needCursor = (isVisible && isMoveMode);
         ImGui::GetIO().MouseDrawCursor = needCursor;
 
-        if (isVisible) {
-            if (!g_IsAuthenticated) DrawAuth();
-            else DrawMenu();
-        }
+        if (isVisible) DrawMenu();
 
         ImGui::Render();
         float clearColor[4] = {0, 0, 0, 0};
@@ -164,42 +155,6 @@ void Overlay::RenderLoop() {
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         swapChain->Present(1, 0);
     }
-}
-
-void Overlay::DrawAuth() {
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f),
-                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(350, 0));
-
-    ImGui::Begin("Login", nullptr,
-                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
-
-    ImGui::TextColored(ImVec4(0, 1, 1, 1), "PAYWALL SYSTEM");
-    ImGui::Separator();
-
-    Player p;
-    long long steamID = p.getSteamID();
-
-    if (steamID == 0) {
-        ImGui::TextColored(ImVec4(1, 0.5f, 0, 1), "Join a match to activate...");
-    } else {
-        ImGui::Text("ID: %lld", steamID);
-        ImGui::InputText("Key", keyBuffer, sizeof(keyBuffer));
-        if (ImGui::Button("ACTIVATE", ImVec2(-1, 30))) {
-            if (Security::VerifyActivation(keyBuffer, std::to_string(steamID))) {
-                g_IsAuthenticated = true;
-                isMoveMode = false;
-                SetInputPassThrough(true);
-            } else {
-                statusMsg = "Banned or Invalid.";
-            }
-        }
-    }
-    if (!statusMsg.empty()) ImGui::TextColored(ImVec4(1, 0, 0, 1), statusMsg.c_str());
-    ImGui::Separator();
-    ImGui::TextDisabled("[INSERT] Hide this window");
-    ImGui::TextDisabled("[END] Exit Cheat");
-    ImGui::End();
 }
 
 void Overlay::DrawMenu() {

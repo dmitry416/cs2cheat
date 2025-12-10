@@ -45,7 +45,6 @@ FetchContent_MakeAvailable(imgui)
 
 add_executable(cs2cheat WIN32
         main.cpp
-        security/Security.h
         headers/offsets.h
         headers/include.h
         utils/Player.cpp
@@ -95,7 +94,6 @@ endif()
 
 target_include_directories(cs2cheat PRIVATE
         headers
-        security
         ui
         ${imgui_SOURCE_DIR}
         ${imgui_SOURCE_DIR}/backends
