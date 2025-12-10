@@ -2,6 +2,7 @@
 #define SECURITY_H
 
 #include <windows.h>
+#include <tlhelp32.h>
 #include <string>
 #include <chrono>
 #include <thread>

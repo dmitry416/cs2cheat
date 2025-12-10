@@ -4,9 +4,6 @@
 #include "../headers/include.h"
 #include "../headers/offsets.h"
 
-using namespace std;
-using namespace offsets;
-using namespace glm;
 
 class Entity;
 
@@ -28,12 +25,12 @@ void checkKeys();
 
 bool init();
 
-void getEntities(vector<Entity> &entities);
+void getEntities(std::vector<Entity> &entities);
 
-float getDistance(vec3 p1, vec3 p2);
+float getDistance(glm::vec3 p1, glm::vec3 p2);
 
-vec3 AnglesToForward(vec3 angles);
+glm::vec3 AnglesToForward(glm::vec3 angles);
 
-vec3 CalculateViewAngles(vec3 source, vec3 destination);
+glm::vec3 CalculateViewAngles(glm::vec3 source, glm::vec3 destination);
 
 #endif

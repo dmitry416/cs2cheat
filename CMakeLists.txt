@@ -36,7 +36,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glm)
 
-add_executable(cs2cheat
+FetchContent_Declare(
+        imgui
+        GIT_REPOSITORY https://github.com/ocornut/imgui.git
+        GIT_TAG v1.91.5-docking
+)
+FetchContent_MakeAvailable(imgui)
+
+add_executable(cs2cheat WIN32
         main.cpp
         security/Security.h
         headers/offsets.h
@@ -47,7 +54,20 @@ add_executable(cs2cheat
         utils/Entity.cpp
         utils/utils.h
         utils/utils.cpp
+        ui/Overlay.h
+        ui/Overlay.cpp
 )
+
+target_sources(cs2cheat PRIVATE
+        ${imgui_SOURCE_DIR}/imgui.cpp
+        ${imgui_SOURCE_DIR}/imgui_draw.cpp
+        ${imgui_SOURCE_DIR}/imgui_tables.cpp
+        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_dx11.cpp
+)
+
+target_include_directories(cs2cheat PRIVATE headers security ui ${imgui_SOURCE_DIR})
 
 target_link_libraries(cs2cheat PRIVATE glm::glm)
 
@@ -67,16 +87,23 @@ if(WIN32)
             psapi
             iphlpapi
             winhttp
+            d3d11
+            d3dcompiler
+            dwmapi
     )
 endif()
 
-target_include_directories(cs2cheat
-        PRIVATE
+target_include_directories(cs2cheat PRIVATE
         headers
         security
+        ui
+        ${imgui_SOURCE_DIR}
+        ${imgui_SOURCE_DIR}/backends
 )
 
 if(WIN32)
+    add_compile_definitions(_WIN32_WINNT=0x0A00)
+
     target_compile_definitions(cs2cheat PRIVATE
             WIN32_LEAN_AND_MEAN
             NOMINMAX

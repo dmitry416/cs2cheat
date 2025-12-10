@@ -1,6 +1,10 @@
 #include "utils.h"
 #include "Entity.h"
 
+using namespace std;
+using namespace glm;
+using namespace offsets;
+
 uintptr_t BaseAddress = 0;
 HWND hwnd = nullptr;
 HANDLE hProcess = nullptr;
@@ -44,6 +48,7 @@ void WPM(uintptr_t address, T buffer) {
 
 
 template int RPM<int>(uintptr_t);
+
 template long long RPM<long long>(uintptr_t);
 
 template float RPM<float>(uintptr_t);
@@ -57,6 +62,7 @@ template void WPM<int>(uintptr_t, int);
 template void WPM<float>(uintptr_t, float);
 
 template void WPM<bool>(uintptr_t, bool);
+
 template void WPM<Color>(uintptr_t, Color);
 
 template vec3 RPM<vec3>(uintptr_t);

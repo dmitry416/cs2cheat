@@ -1,6 +1,9 @@
 #include "Player.h"
 #include "utils.h"
 
+using namespace offsets;
+using namespace glm;
+
 void Player::updateAddress() {
     address = RPM<uintptr_t>(BaseAddress + dwLocalPlayerPawn);
 }

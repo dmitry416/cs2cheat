@@ -1,11 +1,15 @@
+#include <thread>
 #include <atomic>
+#include <vector>
 #include "utils/utils.h"
-#include "utils/Entity.h"
 #include "utils/Player.h"
+#include "utils/Entity.h"
 #include "security/Security.h"
+#include "ui/Overlay.h"
 
 using namespace std;
 using namespace offsets;
+using namespace glm;
 
 bool radarhack = false;
 bool bunnyhop = false;
@@ -14,209 +18,144 @@ bool aimbot = false;
 bool glow = false;
 bool trigger = false;
 
-atomic<bool> isActivated = false;
 atomic<bool> shouldExit = false;
+atomic<bool> g_IsAuthenticated = false;
 
 const int STANDING = 65665;
 const int CROUCHING = 65667;
 const int JUMP_ON = 65537;
 const int JUMP_OFF = 256;
 
-const float maxAimAngle = 6.0f;
-const float maxDistance = 1500;
-
-void ActivationChecker() {
-    const chrono::seconds checkInterval(10);
-
-    while (!shouldExit) {
+void SecurityLoop() {
+    for (;!shouldExit;) {
         if (!Security::Initialize()) {
-            std::cout << "Security check failed!" << std::endl;
             shouldExit = true;
             ExitProcess(1);
         }
-        this_thread::sleep_for(checkInterval);
+        std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 }
 
-void checkKeys() {
-    if (GetAsyncKeyState(VK_F5) & 1) {
-        radarhack = !radarhack;
-        cout << "[Toggle] RadarHack = " << (radarhack ? "ON" : "OFF") << endl;
-    }
-
-    if (GetAsyncKeyState(VK_F6) & 1) {
-        bunnyhop = !bunnyhop;
-        cout << "[Toggle] Bunnyhop = " << (bunnyhop ? "ON" : "OFF") << endl;
-    }
-
-    if (GetAsyncKeyState(VK_F7) & 1) {
-        antiflash = !antiflash;
-        cout << "[Toggle] Anti-Flash = " << (antiflash ? "ON" : "OFF") << endl;
-    }
-
-    if (GetAsyncKeyState(VK_F8) & 1) {
-        aimbot = !aimbot;
-        cout << "[Toggle] Aimbot = " << (aimbot ? "ON" : "OFF") << endl;
-    }
-
-    if (GetAsyncKeyState(VK_F9) & 1) {
-        glow = !glow;
-        cout << "[Toggle] Glow = " << (glow ? "ON" : "OFF") << endl;
-    }
-
-    if (GetAsyncKeyState(VK_F4) & 1) {
-        trigger = !trigger;
-        cout << "[Toggle] Trigger bot = " << (trigger ? "ON" : "OFF") << endl;
-    }
-}
-
-
-int main() {
-    thread checkerThread(ActivationChecker);
-    checkerThread.detach();
-
-    if (!init()) {
-        cout << "Press ENTER to exit..." << endl;
-        cin.get();
-        return 1;
-    }
-
-    std::string key;
-
-    cout << "Enter the activation key: ";
-    cin >> key;
-    cout << "The key is entered. If it is correct, the cheat will work. Good luck ;)\n";
-
+void CheatLoop() {
     Player player;
     vector<Entity> entities;
     entities.reserve(64);
-
     bool wasGlowEnabled = false;
-    const Color enemyGlowColor = {255, 0, 0, 255};
-    const Color teamGlowColor  = {0, 150, 255, 255};
 
     for (;!shouldExit;) {
-        if (!player.isInit()) {
-            this_thread::sleep_for(chrono::milliseconds(100));
+        if (!g_IsAuthenticated) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
             continue;
         }
-        if (!isActivated && !Security::VerifyActivation(key, to_string(player.getSteamID()))) {
-            cout << "Activation failed!" << std::endl;
-            return 1;
+
+        if (!player.isInit()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
         }
-        else {
-            isActivated = true;
-        }
-        checkKeys();
 
         getEntities(entities);
 
         if (radarhack) {
-            getEntities(entities);
             for (Entity &entity: entities) {
-                if (!entity.isInit()) continue;
-                if (entity.getHealth() <= 0 || entity.getTeamNum() == player.getTeamNum()) continue;
-                entity.setSpotted(true);
+                if (entity.isInit() && entity.getHealth() > 0 && entity.getTeamNum() != player.getTeamNum())
+                    entity.setSpotted(true);
             }
         }
 
         if (glow) {
-            getEntities(entities);
-            uintptr_t localPlayerAddress = player.getAddress();
-
-            for (Entity &entity : entities) {
+            uintptr_t localAddr = player.getAddress();
+            for (Entity &entity: entities) {
                 if (entity.isInit() && entity.getHealth() > 0) {
-                    if (entity.getTeamNum() != player.getTeamNum()) {
-                        entity.setGlow(enemyGlowColor);
-                    } else if (entity.getAddress() != localPlayerAddress) {
-                        entity.setGlow(teamGlowColor);
-                    }
+                    if (entity.getTeamNum() != player.getTeamNum())
+                        entity.setGlow({255, 0, 0, 255});
+                    else if (entity.getAddress() != localAddr)
+                        entity.setGlow({0, 150, 255, 255});
                 }
             }
             wasGlowEnabled = true;
         } else if (wasGlowEnabled) {
-            getEntities(entities);
-            for (Entity &entity : entities) {
-                if (entity.isInit()) {
-                    entity.disableGlow();
-                }
-            }
+            for (Entity &entity: entities) if (entity.isInit()) entity.disableGlow();
             wasGlowEnabled = false;
         }
 
-
-        if (bunnyhop) {
-            if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-                int fflag = player.getFFlag();
-                if (fflag == STANDING || fflag == CROUCHING) {
-                    this_thread::sleep_for(chrono::milliseconds(1));
-                    player.setJump(JUMP_ON);
-                } else
-                    player.setJump(JUMP_OFF);
+        if (bunnyhop && (GetAsyncKeyState(VK_SPACE) & 0x8000)) {
+            int fflag = player.getFFlag();
+            if (fflag == STANDING || fflag == CROUCHING) {
+                player.setJump(JUMP_ON);
+                this_thread::sleep_for(chrono::milliseconds(1));
+                player.setJump(JUMP_OFF);
             }
         }
 
-        if (antiflash) {
-            if (player.getFlashDuration() != 0)
-                player.setFlashDuration(0);
+        if (antiflash && player.getFlashDuration() > 0.0f) {
+            player.setFlashDuration(0.0f);
         }
 
-        if (aimbot && GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-            getEntities(entities);
+        if (aimbot && (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
+            vec3 localPos = player.getLocalEyePos();
+            vec3 viewAngles = RPM<vec3>(BaseAddress + dwViewAngles);
+            float bestFov = 6.0f;
+            vec3 bestPos = {0, 0, 0};
+            bool found = false;
 
-            float smallestFOV = maxAimAngle;
-            vec3 bestEnemyPos;
-            int playerTeam = player.getTeamNum();
-            vec3 playerEyePos = player.getLocalEyePos();
-            vec3 currentViewAngles = RPM<vec3>(BaseAddress + dwViewAngles);
+            for (Entity &ent: entities) {
+                if (ent.getHealth() <= 0 || ent.getTeamNum() == player.getTeamNum()) continue;
+                vec3 entPos = ent.getLocalEyePos();
+                if (getDistance(localPos, entPos) > 1500) continue;
 
-            for (Entity &entity: entities) {
-                if (entity.getHealth() <= 0 || entity.getTeamNum() == playerTeam) continue;
+                vec3 delta = entPos - localPos;
+                vec3 fwd = AnglesToForward(viewAngles);
+                float fov = acos(dot(normalize(delta), fwd)) * (180.0f / 3.14159f);
 
-                vec3 entityEyePos = entity.getLocalEyePos();
-
-                float distance = getDistance(playerEyePos, entityEyePos);
-                if (distance > maxDistance) continue;
-
-                vec3 delta = entityEyePos - playerEyePos;
-                vec3 viewForward = AnglesToForward(currentViewAngles);
-
-                float dotProduct = dot(normalize(delta), viewForward);
-                float fov = acos(dotProduct) * (180.0f / pi<float>());
-
-                if (fov < smallestFOV) {
-                    smallestFOV = fov;
-                    bestEnemyPos = entityEyePos;
+                if (fov < bestFov) {
+                    bestFov = fov;
+                    bestPos = entPos;
+                    found = true;
                 }
             }
-
-            if (smallestFOV < maxAimAngle) {
-                vec3 targetAngle = CalculateViewAngles(playerEyePos, bestEnemyPos);
-                WPM<vec3>(BaseAddress + dwViewAngles, targetAngle);
+            if (found) {
+                WPM<vec3>(BaseAddress + dwViewAngles, CalculateViewAngles(localPos, bestPos));
             }
         }
 
         if (trigger) {
-            int crosshairId = player.getCrosshairID();
-            if (crosshairId >= 0) {
-                uintptr_t entityList = RPM<uintptr_t>(BaseAddress + dwEntityList);
-                uintptr_t listEntry = RPM<uintptr_t >(entityList + 0x8 * (crosshairId >> 9) + 0x10);
-                uintptr_t pawn = RPM<uintptr_t>(listEntry + 0x70 * (crosshairId & 0x1FF));
+            int xhair = player.getCrosshairID();
+            if (xhair > 0) {
+                uintptr_t entList = RPM<uintptr_t>(BaseAddress + dwEntityList);
+                uintptr_t entry = RPM<uintptr_t>(entList + 0x8 * (xhair >> 9) + 0x10);
+                uintptr_t pawn = RPM<uintptr_t>(entry + 0x70 * (xhair & 0x1FF));
+
                 if (pawn) {
-                    Entity entity(pawn);
-                    if (entity.getTeamNum() != player.getTeamNum() && entity.getHealth() > 0) {
+                    Entity target(pawn);
+                    if (target.getTeamNum() != player.getTeamNum() && target.getHealth() > 0) {
                         this_thread::sleep_for(chrono::milliseconds(5));
                         player.setAttack(65537);
-                        this_thread::sleep_for(chrono::milliseconds(5));
+                        this_thread::sleep_for(chrono::milliseconds(10));
                         player.setAttack(256);
                     }
                 }
             }
         }
 
-        this_thread::sleep_for(chrono::milliseconds(10));
+        std::this_thread::sleep_for(chrono::milliseconds(2));
+    }
+}
+
+int main() {
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+    if (!init()) return 1;
+
+    thread sec(SecurityLoop);
+    sec.detach();
+    thread cheat(CheatLoop);
+    cheat.detach();
+
+    if (Overlay::Initialize()) {
+        Overlay::RenderLoop();
+        Overlay::Cleanup();
     }
 
+    shouldExit = true;
     if (hProcess) CloseHandle(hProcess);
     return 0;
 }

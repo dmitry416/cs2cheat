@@ -1,6 +1,9 @@
 #include "Entity.h"
 #include "utils.h"
 
+using namespace offsets;
+using namespace glm;
+
 Entity::Entity(uintptr_t address) {
     this->address = address;
 }
