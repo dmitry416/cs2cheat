@@ -29,12 +29,6 @@ public:
         return ServerVerify(key, steamId);
     }
 
-    static std::string GetSteamIDFromProcess() {
-        DWORD steamPid = FindProcessId("steam.exe");
-        if (steamPid == 0) return "";
-        return "76561197960287930"; // Заглушка
-    }
-
 private:
     static DWORD FindProcessId(const std::string &processName) {
         DWORD pid = 0;
@@ -141,7 +135,7 @@ private:
                 return false;
             }
 
-            hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/verify",
+            hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/verify/",
                                           nullptr, WINHTTP_NO_REFERER,
                                           WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
             if (!hRequest) {
