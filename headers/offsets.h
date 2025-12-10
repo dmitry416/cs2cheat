@@ -27,10 +27,10 @@ namespace offsets {
     constexpr ::std::ptrdiff_t m_iGlowType = 0x30;
     constexpr ::std::ptrdiff_t m_steamID = 0x770;
 
-    inline uintptr_t dwEntityList = 0x1D12CE8;
-    inline uintptr_t dwLocalPlayerPawn = 0x1BEDF28;
-    inline uintptr_t dwLocalPlayerController = 0x1E1CC08;
-    constexpr ::std::ptrdiff_t dwViewAngles = 0x1E3B800;
-    constexpr ::std::ptrdiff_t dwForceJump = 0x1BE78B0;
-    constexpr ::std::ptrdiff_t dwForceAttack = 0x1BE73A0;
+    inline uintptr_t dwEntityList = 0x1D13CE8;
+    inline uintptr_t dwLocalPlayerPawn = 0x1BEEF28;
+    inline uintptr_t dwLocalPlayerController = 0x1E1DC18;
+    constexpr ::std::ptrdiff_t dwViewAngles = 0x1E3C800;
+    constexpr ::std::ptrdiff_t dwForceJump = 0x1BE88B0;
+    constexpr ::std::ptrdiff_t dwForceAttack = 0x1BE83A0;
 }
